@@ -27,12 +27,21 @@ public class RepoActivity extends AppCompatActivity {
     RecyclerView mRecyclerView;
     List<GitHubRepo> myDataSource = new ArrayList<>();
     RecyclerView.Adapter myAdapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_repo);
 
-       
+
+        //  getSupportActionBar().setTitle("Messages");
+
+        //  getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+//        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+//        getSupportActionBar().setTitle("Repo List");
+
+
         Bundle extras = getIntent().getExtras();
         receivedUserName = extras.getString("username");
 
@@ -40,7 +49,7 @@ public class RepoActivity extends AppCompatActivity {
 
         userNameTV.setText("User: " + receivedUserName);
 
-        mRecyclerView= (RecyclerView) findViewById(R.id.repos_recycler_view);
+        mRecyclerView = (RecyclerView) findViewById(R.id.repos_recycler_view);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         myAdapter = new ReposAdapter(myDataSource, R.layout.list_item_repo,
                 getApplicationContext());
@@ -51,25 +60,25 @@ public class RepoActivity extends AppCompatActivity {
 
     }
 
-    public void loadRepositories(){
+    public void loadRepositories() {
         GitHubRepoEndPoint apiService =
                 ApiClient.getClient().create(GitHubRepoEndPoint.class);
 
         Call<List<GitHubRepo>> call = apiService.getRepo(receivedUserName);
 
         call.enqueue(new Callback<List<GitHubRepo>>() {
-                         @Override
-                         public void onResponse(Response<List<GitHubRepo>> response, Retrofit retrofit) {
-                             myDataSource.clear();
-                             myDataSource.addAll(response.body());
-                             myAdapter.notifyDataSetChanged();
-                         }
+            @Override
+            public void onResponse(Response<List<GitHubRepo>> response, Retrofit retrofit) {
+                myDataSource.clear();
+                myDataSource.addAll(response.body());
+                myAdapter.notifyDataSetChanged();
+            }
 
-                         @Override
-                         public void onFailure(Throwable t) {
-                             Log.e("Repos", t.toString());
-                         }
-                     } );
+            @Override
+            public void onFailure(Throwable t) {
+                Log.e("Repos", t.toString());
+            }
+        });
 
 
     }

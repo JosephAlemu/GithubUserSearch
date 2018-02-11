@@ -13,6 +13,8 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -37,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
     TextView logIn;
     TextView email;
     Button ownedrepos;
+    Button ownedReposBtn;
 
     Bundle extras;
     String newString;
@@ -53,8 +56,6 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
 
-
-
         avatarImg = (ImageView) findViewById(R.id.avatar);
         userNameTV = (TextView) findViewById(R.id.username);
         followersTV = (TextView) findViewById(R.id.followers);
@@ -62,8 +63,9 @@ public class MainActivity extends AppCompatActivity {
         logIn = (TextView) findViewById(R.id.logIn);
         email = (TextView) findViewById(R.id.email);
         ownedrepos = (Button) findViewById(R.id.ownedReposBtn);
+        ownedReposBtn = (Button) findViewById(R.id.ownedReposBtn);
 
-         etSearch =(EditText)findViewById(R.id.etSearch);
+        etSearch = (EditText) findViewById(R.id.etSearch);
     }
 
 //    public void onClickSearch(View view) {
@@ -77,8 +79,7 @@ public class MainActivity extends AppCompatActivity {
 //    }
 
 
-    public void onClickSearch(View view)
-    {
+    public void onClickSearch(View view) {
         newString = etSearch.getText().toString();
         final GitHubUserEndPoints apiService =
                 ApiClient.getClient().create(GitHubUserEndPoints.class);
@@ -88,22 +89,16 @@ public class MainActivity extends AppCompatActivity {
         call.enqueue(new Callback<GitHubUser>() {
             @Override
             public void onResponse(Response<GitHubUser> response, Retrofit retrofit) {
-                ImageDownloader task = new ImageDownloader();
 
-                try {
-                    myImage = task.execute(response.body().getAvatar()).get();
 
-                } catch (Exception e) {
+                String currentUrl = response.body().getAvatar();
 
-                    e.printStackTrace();
 
-                }
+                Glide.with(getApplicationContext())
+                        .load(currentUrl)
+                        .into(avatarImg);
 
-                avatarImg.setImageBitmap(myImage);
-                avatarImg.getLayoutParams().height=220;
-                avatarImg.getLayoutParams().width=220;
-
-                if(response.body().getName() == null){
+                if (response.body().getName() == null) {
                     userNameTV.setText("No name provided");
                 } else {
                     userNameTV.setText("Username: " + response.body().getName());
@@ -113,11 +108,12 @@ public class MainActivity extends AppCompatActivity {
                 followingTV.setText("Following: " + response.body().getFollowing());
                 logIn.setText("LogIn: " + response.body().getLogin());
 
-                if(response.body().getEmail() == null){
+                if (response.body().getEmail() == null) {
                     email.setText("No email provided");
-                } else{
+                } else {
                     email.setText("Email: " + response.body().getEmail());
                 }
+                ownedReposBtn.setVisibility(View.VISIBLE);
             }
 
             @Override
@@ -127,40 +123,15 @@ public class MainActivity extends AppCompatActivity {
         });
 
     }
+
     public void loadOwnRepos(View view) {
 
-        Intent intent = new Intent(MainActivity.this,RepoActivity.class);
+        Intent intent = new Intent(MainActivity.this, RepoActivity.class);
         intent.putExtra("username", newString);
         startActivity(intent);
     }
 
-    public class ImageDownloader extends AsyncTask<String, Void, Bitmap> {
-        @Override
-        protected Bitmap doInBackground(String... urls) {
-
-            try {
-
-                URL url = new URL(urls[0]);
-                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                connection.connect();
-                InputStream inputStream = connection.getInputStream();
-                Bitmap myBitmap = BitmapFactory.decodeStream(inputStream);
-                return myBitmap;
-
-            } catch (MalformedURLException e) {
-
-                e.printStackTrace();
-
-            } catch (IOException e) {
-
-                e.printStackTrace();
-
-            }
-            return null;
-        }
-    }
-
-
-
 
 }
+
+
